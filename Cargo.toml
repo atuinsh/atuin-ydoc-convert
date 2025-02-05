@@ -1,0 +1,12 @@
+[package]
+name = "atuin-ydoc-convert"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+serde_json = "1.0.138"
+roxmltree = "0.20.0"
+
+[dev-dependencies]
+pretty_assertions = "1.4.1"
+json-digest = "0.0.16"
