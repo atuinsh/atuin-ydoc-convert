@@ -28,7 +28,7 @@ impl std::fmt::Display for Error {
 }
 
 pub(crate) fn convert(xml: String) -> Result<serde_json::Value, Error> {
-    let doc = Document::parse(&xml).map_err(|e| Error::ParseError(e))?;
+    let doc = Document::parse(&xml).map_err(Error::ParseError)?;
     let blockgroup = doc.root_element();
 
     let blocks = convert_blockgroup(blockgroup)?;
@@ -101,7 +101,7 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<Content, Error
                             || (child.is_text() && !child.text().unwrap().trim().is_empty())
                     })
                     .collect::<Vec<_>>();
-                if children.len() == 0 {
+                if children.is_empty() {
                     Err(Error::MalformedDocument(
                         "style tag with no children".to_string(),
                         node.document().text_pos_at(node.range().start),
@@ -121,7 +121,7 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<Content, Error
                 content.type_name = name.to_string();
                 content.apply_attributes(node.attributes());
                 let children = node.children().collect::<Vec<_>>();
-                if children.len() > 0 {
+                if !children.is_empty() {
                     content.content = Some(
                         children
                             .iter()
@@ -132,11 +132,9 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<Content, Error
                 Ok(content)
             }
         },
-        other => {
-            return Err(Error::MalformedDocument(
-                "Unsupported node type in content position".to_string(),
-                node.document().text_pos_at(node.range().start),
-            ));
-        }
+        _ => Err(Error::MalformedDocument(
+            "Unsupported node type in content position".to_string(),
+            node.document().text_pos_at(node.range().start),
+        )),
     }
 }

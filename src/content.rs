@@ -31,12 +31,7 @@ impl Content {
         map.insert("type".to_string(), json!(self.type_name));
         let mut styles = serde_json::Map::new();
         for style in self.styles.iter() {
-            match style {
-                Style::Bold => styles.insert("bold".to_string(), json!(true)),
-                Style::Italic => styles.insert("italic".to_string(), json!(true)),
-                Style::Underline => styles.insert("underline".to_string(), json!(true)),
-                Style::Strike => styles.insert("strike".to_string(), json!(true)),
-            };
+            styles.insert(style.name().to_string(), json!(true));
         }
         map.insert("styles".to_string(), Value::Object(styles));
         for prop in self.props.iter() {
