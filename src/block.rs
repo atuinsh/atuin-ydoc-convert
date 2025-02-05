@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use roxmltree::Attributes;
 use serde_json::{json, Value};
 
@@ -30,7 +32,30 @@ impl Block {
                     self.id = attr.value().to_string();
                 }
                 name => {
-                    self.props.insert(name.to_string(), json!(attr.value()));
+                    // Handle type conversion for built-in block types
+                    match (self.type_name.as_str(), name) {
+                        ("heading", "level")
+                        | ("image", "previewWidth")
+                        | ("video", "previewWidth") => {
+                            let value = attr.value().parse::<u64>().unwrap();
+                            self.props.insert(name.to_string(), json!(value));
+                        }
+                        ("checkListItem", "checked")
+                        | ("image", "showPreview")
+                        | ("audio", "showPreview")
+                        | ("video", "showPreview") => {
+                            let value = attr.value().parse::<bool>().unwrap();
+                            self.props.insert(name.to_string(), json!(value));
+                        }
+                        ("bulletlistitem", "index")
+                        | ("checklistitem", "index")
+                        | ("numberedListItem", "index") => {
+                            // do not insert
+                        }
+                        _ => {
+                            self.props.insert(name.to_string(), json!(attr.value()));
+                        }
+                    }
                 }
             }
         }

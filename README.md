@@ -31,9 +31,8 @@ println!("{}", json);
 
 ## Notes and Exceptions
 
-1. There are some properties that exist on the XML tags that aren't found in BlockNote objects. Since the BlockNote schema is needed to determine which properties are valid, this library applies _all_ attributes found on  XML tags to the BlockNote objects. Some examples:
-    * `blockcontainer` has a `backgroundColor` property, but many custom blocks do not support it.
-    * List items have an `index` property, but BlockNote uses array ordering.
-    * An empty `content` array is added to blocks that don't support content.
-2. Since XML encodes all attributes as strings, this library parses them as strings as well. Consumers should convert to numerics or booleans as appropriate.
+1. There are some properties that exist on the XML tags that aren't found in BlockNote objects. Since the BlockNote schema is needed to determine which properties are valid for custom block types, this library applies _all_ attributes found on  XML tags to custom BlockNote block objects. Some examples:
+    * `<blockcontainer>` nodes always have a `backgroundColor` attribute, but many blocks do not use it as a prop.
+    * An empty `content` array is added to all blocks, including ones that don't support content.
+2. Since XML encodes all attributes as strings, this library parses them as strings as well. Properties for built-in block types are converted to numerics or booleans as appropriate; for custom blocks, consumers should handle the conversion.
 3. The XML attributes BlockNote stores in the YJS document are not escaped properly. Quotes, ampersands, tabs, newlines, etc. must be escaped before being passed to this library.
