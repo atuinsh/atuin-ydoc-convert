@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use roxmltree::Attributes;
 use serde_json::{json, Value};
 
