@@ -1,17 +1,19 @@
 use roxmltree::Attributes;
 use serde_json::{json, Value};
 
+use super::style::Style;
+
 #[derive(Clone, Debug)]
-pub(crate) struct Content {
+pub(crate) struct BasicContent {
     pub type_name: String,
     pub props: serde_json::Map<String, Value>,
-    pub content: Option<Vec<Content>>,
+    pub content: Option<Vec<BasicContent>>,
     pub styles: Vec<Style>,
 }
 
-impl Content {
+impl BasicContent {
     pub fn new() -> Self {
-        Content {
+        BasicContent {
             type_name: String::new(),
             content: None,
             props: serde_json::Map::new(),
@@ -44,36 +46,5 @@ impl Content {
             );
         }
         Value::Object(map)
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum Style {
-    Bold,
-    Italic,
-    Underline,
-    Strike,
-}
-
-impl Style {
-    pub fn name(&self) -> &str {
-        match self {
-            Style::Bold => "bold",
-            Style::Italic => "italic",
-            Style::Underline => "underline",
-            Style::Strike => "strike",
-        }
-    }
-}
-
-impl From<&str> for Style {
-    fn from(s: &str) -> Self {
-        match s {
-            "bold" => Style::Bold,
-            "italic" => Style::Italic,
-            "underline" => Style::Underline,
-            "strike" => Style::Strike,
-            _ => panic!("Invalid style: {}", s),
-        }
     }
 }

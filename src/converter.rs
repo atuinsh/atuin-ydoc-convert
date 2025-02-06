@@ -3,7 +3,12 @@ use serde_json::Value;
 
 use crate::{
     block::Block,
-    content::{Content, Style},
+    content::{
+        basic::BasicContent,
+        style::Style,
+        table::{TableCell, TableContent, TableRow},
+        Content,
+    },
 };
 
 #[derive(Debug, Clone)]
@@ -64,12 +69,16 @@ fn convert_block_container(block_container: Node) -> Result<Block, Error> {
     block.type_name = block_elem.tag_name().name().to_string();
     block.apply_attributes(block_elem.attributes());
 
+    if block.type_name.as_str() == "table" {
+        return convert_table(block_elem, block);
+    }
+
     // Check if the block has content
     let content = block_elem
         .children()
         .map(|child| convert_content(child, &mut vec![]))
         .collect::<Result<Vec<_>, _>>()?;
-    block.content = Some(content);
+    block.content = Some(Content::Basic(content));
 
     // Check if the block has children
     if let Some(blockgroup) = children.next() {
@@ -79,10 +88,10 @@ fn convert_block_container(block_container: Node) -> Result<Block, Error> {
     Ok(block)
 }
 
-fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<Content, Error> {
+fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<BasicContent, Error> {
     match node.node_type() {
         NodeType::Text => {
-            let mut content = Content::new();
+            let mut content = BasicContent::new();
             content.type_name = "text".to_string();
             content.props.insert("text".to_string(), node.text().into());
             content.styles = styles.clone();
@@ -117,7 +126,7 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<Content, Error
                 }
             }
             name => {
-                let mut content = Content::new();
+                let mut content = BasicContent::new();
                 content.type_name = name.to_string();
                 content.apply_attributes(node.attributes());
                 let children = node.children().collect::<Vec<_>>();
@@ -137,4 +146,45 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<Content, Error
             node.document().text_pos_at(node.range().start),
         )),
     }
+}
+
+fn convert_table(block_elem: Node, mut block: Block) -> Result<Block, Error> {
+    let mut content = BasicContent::new();
+    content.type_name = "tableContent".to_string();
+
+    let row_elems = block_elem.children().filter(|child| child.is_element());
+    let rows = row_elems
+        .map(|row_elem| convert_table_row(row_elem))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    block.content = Some(Content::Table(TableContent::new(rows)));
+    Ok(block)
+}
+
+fn convert_table_row(row_elem: Node) -> Result<TableRow, Error> {
+    let cell_elems = row_elem.children().filter(|child| child.is_element());
+    let cells = cell_elems
+        .map(|cell_elem| convert_table_cell(cell_elem))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(cells)
+}
+
+fn convert_table_cell(cell_elem: Node) -> Result<TableCell, Error> {
+    let paragraph_elem = cell_elem
+        .first_element_child()
+        .ok_or(Error::MalformedDocument(
+            "table cell with no table paragraph".to_string(),
+            cell_elem.document().text_pos_at(cell_elem.range().start),
+        ))?;
+
+    let mut cell = Vec::new();
+    cell.extend(
+        paragraph_elem
+            .children()
+            .map(|child| convert_content(child, &mut vec![]))
+            .collect::<Result<Vec<_>, _>>()?,
+    );
+
+    Ok(cell)
 }

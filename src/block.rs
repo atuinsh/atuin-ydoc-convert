@@ -8,7 +8,7 @@ pub(crate) struct Block {
     pub id: String,
     pub type_name: String,
     pub props: serde_json::Map<String, Value>,
-    pub content: Option<Vec<Content>>,
+    pub content: Option<Content>,
     pub children: Vec<Block>,
 }
 
@@ -71,10 +71,7 @@ impl Block {
         map.insert("type".to_string(), json!(type_name));
         map.insert("props".to_string(), Value::Object(self.props.clone()));
         if let Some(content) = &self.content {
-            map.insert(
-                "content".to_string(),
-                json!(content.iter().map(|c| c.to_json()).collect::<Vec<Value>>()),
-            );
+            map.insert("content".to_string(), json!(content.to_json()));
         } else {
             map.insert("content".to_string(), json!([]));
         }

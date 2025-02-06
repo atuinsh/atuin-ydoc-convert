@@ -346,6 +346,88 @@ fn test_convert_list() {
 }
 
 #[test]
+fn test_convert_table() {
+    let input = r#"
+    <blockGroup>
+      <blockContainer id="f6596d68-4414-48f3-b502-eb54c9a00b17" textColor="default" backgroundColor="default">
+        <table>
+          <tableRow>
+            <tableCell rowspan="1" colspan="1">
+              <tableParagraph>one</tableParagraph>
+            </tableCell>
+            <tableCell colspan="1" rowspan="1" colwidth="[335]">
+              <tableParagraph>two</tableParagraph>
+            </tableCell>
+            <tableCell rowspan="1" colspan="1">
+              <tableParagraph><italic>three</italic></tableParagraph>
+            </tableCell>
+          </tableRow>
+          <tableRow>
+            <tableCell colspan="1" rowspan="1">
+              <tableParagraph><bold>four</bold></tableParagraph>
+            </tableCell>
+            <tableCell rowspan="1" colspan="1" colwidth="[335]">
+              <tableParagraph>f<bold>iv</bold>e</tableParagraph>
+            </tableCell>
+            <tableCell rowspan="1" colspan="1">
+              <tableParagraph><bold><italic><strike>six</strike></italic></bold></tableParagraph>
+            </tableCell>
+          </tableRow>
+        </table>
+      </blockContainer>
+    </blockGroup>
+    "#;
+
+    let expected: Value = serde_json::from_str(
+        r#"
+    [
+      {
+        "id": "f6596d68-4414-48f3-b502-eb54c9a00b17",
+        "type": "table",
+        "props": { "textColor": "default" },
+        "content": {
+          "type": "tableContent",
+          "columnWidths": [null, 335, null],
+          "rows": [
+            {
+              "cells": [
+                [{ "type": "text", "text": "one", "styles": {} }],
+                [{ "type": "text", "text": "two", "styles": {} }],
+                [{ "type": "text", "text": "three", "styles": { "italic": true } }]
+              ]
+            },
+            {
+              "cells": [
+                [{ "type": "text", "text": "four", "styles": { "bold": true } }],
+                [
+                  { "type": "text", "text": "f", "styles": {} },
+                  { "type": "text", "text": "iv", "styles": { "bold": true } },
+                  { "type": "text", "text": "e", "styles": {} }
+                ],
+                [
+                  {
+                    "type": "text",
+                    "text": "six",
+                    "styles": { "bold": true, "italic": true, "strike": true }
+                  }
+                ]
+              ]
+            }
+          ]
+        },
+        "children": []
+      }
+    ]
+    "#,
+    )
+    .unwrap();
+
+    let result = convert_to_value(input.to_string()).unwrap();
+
+    assert_json_eq(&expected, &result);
+}
+
+#[test]
 fn test_everything_bagel() {
     let input = fs::read_to_string("tests/fixtures/everything_input.xml").unwrap();
     let expected =
