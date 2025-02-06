@@ -3,7 +3,7 @@ use atuin_ydoc_convert::convert_to_value;
 use serde_json::Value;
 use std::fs;
 
-fn assert_json_eq(expected: &Value, actual: &Value) {
+fn assert_json_incl(expected: &Value, actual: &Value) {
     let actual =
         &serde_json::from_str::<Value>(&json_digest::canonical_json(&actual).unwrap()).unwrap();
     let expected =
@@ -43,7 +43,7 @@ fn test_convert_basic_block() {
 
     let result = convert_to_value(input.to_string()).unwrap();
 
-    assert_json_eq(&expected, &result);
+    assert_json_incl(&expected, &result);
 }
 
 #[test]
@@ -82,7 +82,7 @@ fn test_convert_http_block() {
 
     let result = convert_to_value(input.to_string()).unwrap();
 
-    assert_json_eq(&expected, &result);
+    assert_json_incl(&expected, &result);
 }
 
 #[test]
@@ -131,7 +131,7 @@ fn test_convert_formatted_content() {
 
     let result = convert_to_value(input.to_string()).unwrap();
 
-    assert_json_eq(&expected, &result);
+    assert_json_incl(&expected, &result);
 }
 
 #[test]
@@ -238,7 +238,7 @@ fn test_convert_nested_block() {
 
     let result = convert_to_value(input.to_string()).unwrap();
 
-    assert_json_eq(&expected, &result);
+    assert_json_incl(&expected, &result);
 }
 
 #[test]
@@ -336,7 +336,7 @@ fn test_convert_list() {
 
     let result = convert_to_value(input.to_string()).unwrap();
 
-    assert_json_eq(&expected, &result);
+    assert_json_incl(&expected, &result);
 }
 
 #[test]
@@ -418,7 +418,7 @@ fn test_convert_table() {
 
     let result = convert_to_value(input.to_string()).unwrap();
 
-    assert_json_eq(&expected, &result);
+    assert_json_incl(&expected, &result);
 }
 
 #[test]
@@ -430,5 +430,5 @@ fn test_everything_bagel() {
 
     let result = convert_to_value(input.to_string()).unwrap();
 
-    assert_json_eq(&expected, &result);
+    assert_json_incl(&expected, &result);
 }
