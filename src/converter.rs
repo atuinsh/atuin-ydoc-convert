@@ -98,7 +98,7 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<BasicContent, 
             Ok(content)
         }
         NodeType::Element => match node.tag_name().name() {
-            "bold" | "italic" | "underline" | "strike" => {
+            "bold" | "italic" | "underline" | "strike" | "textColor" | "backgroundColor" => {
                 // Style tags can have either one text child or one element child.
                 // In the case of an element child, the tag could be surrounded by whitespace.
                 // This seems to only happen when the XML is formatted with newlines,
@@ -121,7 +121,32 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<BasicContent, 
                         node.document().text_pos_at(node.range().start),
                     ))
                 } else {
-                    styles.push(node.tag_name().name().into());
+                    match node.tag_name().name() {
+                        "textColor" => {
+                            styles.push(Style::TextColor(
+                                node.attributes()
+                                    .find(|attr| attr.name() == "stringValue")
+                                    .map(|attr| attr.value().to_string())
+                                    .unwrap_or("default".to_string()),
+                            ));
+                        }
+                        "backgroundColor" => {
+                            styles.push(Style::BackgroundColor(
+                                node.attributes()
+                                    .find(|attr| attr.name() == "stringValue")
+                                    .map(|attr| attr.value().to_string())
+                                    .unwrap_or("default".to_string()),
+                            ));
+                        }
+                        style => {
+                            styles.push(style.try_into().map_err(|e| {
+                                Error::MalformedDocument(
+                                    e,
+                                    node.document().text_pos_at(node.range().start),
+                                )
+                            })?);
+                        }
+                    }
                     convert_content(*children.first().unwrap(), styles)
                 }
             }

@@ -1,9 +1,11 @@
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Style {
     Bold,
     Italic,
     Underline,
     Strike,
+    TextColor(String),
+    BackgroundColor(String),
 }
 
 impl Style {
@@ -13,18 +15,22 @@ impl Style {
             Style::Italic => "italic",
             Style::Underline => "underline",
             Style::Strike => "strike",
+            Style::TextColor(_) => "textColor",
+            Style::BackgroundColor(_) => "backgroundColor",
         }
     }
 }
 
-impl From<&str> for Style {
-    fn from(s: &str) -> Self {
+impl TryFrom<&str> for Style {
+    type Error = String;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
         match s {
-            "bold" => Style::Bold,
-            "italic" => Style::Italic,
-            "underline" => Style::Underline,
-            "strike" => Style::Strike,
-            _ => panic!("Invalid style: {}", s),
+            "bold" => Ok(Style::Bold),
+            "italic" => Ok(Style::Italic),
+            "underline" => Ok(Style::Underline),
+            "strike" => Ok(Style::Strike),
+            _ => Err(format!("Cannot create Style from {}", s)),
         }
     }
 }

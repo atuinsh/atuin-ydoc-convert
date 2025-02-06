@@ -33,7 +33,17 @@ impl BasicContent {
         map.insert("type".to_string(), json!(self.type_name));
         let mut styles = serde_json::Map::new();
         for style in self.styles.iter() {
-            styles.insert(style.name().to_string(), json!(true));
+            match style {
+                Style::TextColor(color) => {
+                    styles.insert("textColor".to_string(), json!(color));
+                }
+                Style::BackgroundColor(color) => {
+                    styles.insert("backgroundColor".to_string(), json!(color));
+                }
+                _ => {
+                    styles.insert(style.name().to_string(), json!(true));
+                }
+            }
         }
         map.insert("styles".to_string(), Value::Object(styles));
         for prop in self.props.iter() {
