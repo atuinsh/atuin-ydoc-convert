@@ -1,21 +1,15 @@
+use assert_json_diff::assert_json_include;
 use atuin_ydoc_convert::convert_to_value;
 use serde_json::Value;
 use std::fs;
 
-#[cfg(test)]
-use pretty_assertions::assert_eq;
+fn assert_json_eq(expected: &Value, actual: &Value) {
+    let actual =
+        &serde_json::from_str::<Value>(&json_digest::canonical_json(&actual).unwrap()).unwrap();
+    let expected =
+        &serde_json::from_str::<Value>(&json_digest::canonical_json(&expected).unwrap()).unwrap();
 
-fn assert_json_eq(result: &Value, expected: &Value) {
-    let compare = serde_json::to_string_pretty(
-        &serde_json::from_str::<Value>(&json_digest::canonical_json(&result).unwrap()).unwrap(),
-    )
-    .unwrap();
-    let expected = serde_json::to_string_pretty(
-        &serde_json::from_str::<Value>(&json_digest::canonical_json(&expected).unwrap()).unwrap(),
-    )
-    .unwrap();
-
-    assert_eq!(compare, expected);
+    assert_json_include!(actual: actual, expected: expected);
 }
 
 #[test]
