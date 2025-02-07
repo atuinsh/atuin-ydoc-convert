@@ -5,9 +5,9 @@ use std::fs;
 
 fn assert_json_incl(expected: &Value, actual: &Value) {
     let actual =
-        &serde_json::from_str::<Value>(&json_digest::canonical_json(&actual).unwrap()).unwrap();
+        &serde_json::from_str::<Value>(&json_digest::canonical_json(actual).unwrap()).unwrap();
     let expected =
-        &serde_json::from_str::<Value>(&json_digest::canonical_json(&expected).unwrap()).unwrap();
+        &serde_json::from_str::<Value>(&json_digest::canonical_json(expected).unwrap()).unwrap();
 
     assert_json_include!(actual: actual, expected: expected);
 }

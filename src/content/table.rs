@@ -33,11 +33,9 @@ impl TableContent {
 
     pub fn to_json(&self) -> Value {
         let column_widths = self
-            .0
-            .iter()
-            .next()
+            .0.first()
             .map(|row| row.iter().map(|cell| cell.colwidth).collect::<Vec<_>>())
-            .unwrap_or(vec![]);
+            .unwrap_or_default();
 
         let mut map = serde_json::Map::new();
         map.insert("type".to_string(), json!("tableContent"));
