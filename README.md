@@ -14,6 +14,8 @@ println!("{}", json);
 
 ### Functions
 
+* `get_fragment_xml(doc: yrs::Doc, fragment_name: String) -> String` \
+  Returns well-formatted XML for the fragment with the given name in the given document. Note that this is different than what you would get if you called `get_string()` on the `XmlFragmentRef`; the XML returned by this function is not identical to the XML that BlockNote uses to store documents. It is crafted to be suitable to be parsed by this library.
 * `convert_to_json(xml: String) -> Result<String, Error>` \
   Converts the XML to a JSON string.
 * `convert_to_json_pretty(xml: String) -> Result<String, Error>` \
@@ -35,4 +37,3 @@ println!("{}", json);
     * `<blockcontainer>` nodes always have a `backgroundColor` attribute, but many blocks do not use it as a prop.
     * An empty `content` array is added to all blocks, including ones that don't support content.
 2. Since XML encodes all attributes as strings, this library parses them as strings as well. Properties for built-in block types are converted to numerics or booleans as appropriate; for custom blocks, consumers should handle the conversion.
-3. The XML attributes BlockNote stores in the YJS document are not escaped properly. Quotes, ampersands, tabs, newlines, etc. must be escaped before being passed to this library.
