@@ -20,7 +20,10 @@ jobs:
         run: |
           set -o pipefail
           EXIT_CODE=0
-          cargo test --verbose || EXIT_CODE=$?
+          echo "===== TESTS ====="
+          cargo test || EXIT_CODE=$?
+          echo "===== CHECK ====="
           cargo check || EXIT_CODE=$?
+          echo "===== CLIPPY ====="
           cargo clippy -- -D warnings || EXIT_CODE=$?
           exit $EXIT_CODE
