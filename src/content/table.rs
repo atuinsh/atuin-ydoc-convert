@@ -3,36 +3,56 @@ use serde_json::{json, Value};
 use super::basic::BasicContent;
 
 pub(crate) type TableRow = Vec<TableCell>;
-pub(crate) type TableCell = Vec<BasicContent>;
 
 #[derive(Clone, Debug)]
-pub(crate) struct TableContent {
-    pub column_widths: Vec<Option<u32>>,
-    pub rows: Vec<TableRow>,
+pub(crate) struct TableCell {
+    pub content: Vec<BasicContent>,
+    pub colspan: u32,
+    pub rowspan: u32,
+    pub colwidth: Option<u32>,
 }
+
+impl TableCell {
+    pub fn new() -> Self {
+        TableCell {
+            content: Vec::new(),
+            colspan: 1,
+            rowspan: 1,
+            colwidth: None,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct TableContent(Vec<TableRow>);
 
 impl TableContent {
     pub fn new(rows: Vec<TableRow>) -> Self {
-        TableContent {
-            column_widths: Vec::new(),
-            rows,
-        }
+        TableContent(rows)
     }
 
     pub fn to_json(&self) -> Value {
+        let column_widths = self
+            .0
+            .iter()
+            .next()
+            .map(|row| row.iter().map(|cell| cell.colwidth).collect::<Vec<_>>())
+            .unwrap_or(vec![]);
+
         let mut map = serde_json::Map::new();
         map.insert("type".to_string(), json!("tableContent"));
-        map.insert("columnWidths".to_string(), json!(self.column_widths));
+        map.insert("columnWidths".to_string(), json!(column_widths));
         map.insert(
             "rows".to_string(),
             json!(self
-                .rows
+                .0
                 .iter()
                 .map(|row| {
                     let cells = row
                         .iter()
                         .map(|cell| {
                             json!(cell
+                                .content
                                 .iter()
                                 .map(|content| content.to_json())
                                 .collect::<Vec<Value>>())

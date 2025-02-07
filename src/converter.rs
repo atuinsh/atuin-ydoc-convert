@@ -174,9 +174,6 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<BasicContent, 
 }
 
 fn convert_table(block_elem: Node, mut block: Block) -> Result<Block, Error> {
-    let mut content = BasicContent::new();
-    content.type_name = "tableContent".to_string();
-
     let row_elems = block_elem.children().filter(|child| child.is_element());
     let rows = row_elems
         .map(|row_elem| convert_table_row(row_elem))
@@ -196,6 +193,44 @@ fn convert_table_row(row_elem: Node) -> Result<TableRow, Error> {
 }
 
 fn convert_table_cell(cell_elem: Node) -> Result<TableCell, Error> {
+    let mut cell = TableCell::new();
+
+    for attr in cell_elem.attributes() {
+        match attr.name() {
+            "colspan" => {
+                cell.colspan = attr.value().parse::<u32>().map_err(|_| {
+                    Error::MalformedDocument(
+                        "Invalid colspan".to_string(),
+                        cell_elem.document().text_pos_at(cell_elem.range().start),
+                    )
+                })?;
+            }
+            "rowspan" => {
+                cell.rowspan = attr.value().parse::<u32>().map_err(|_| {
+                    Error::MalformedDocument(
+                        "Invalid rowspan".to_string(),
+                        cell_elem.document().text_pos_at(cell_elem.range().start),
+                    )
+                })?;
+            }
+            "colwidth" => {
+                cell.colwidth = Some(
+                    attr.value()
+                        .trim_start_matches("[")
+                        .trim_end_matches("]")
+                        .parse::<u32>()
+                        .map_err(|_| {
+                            Error::MalformedDocument(
+                                "Invalid colwidth".to_string(),
+                                cell_elem.document().text_pos_at(cell_elem.range().start),
+                            )
+                        })?,
+                );
+            }
+            _ => {}
+        }
+    }
+
     let paragraph_elem = cell_elem
         .first_element_child()
         .ok_or(Error::MalformedDocument(
@@ -203,13 +238,11 @@ fn convert_table_cell(cell_elem: Node) -> Result<TableCell, Error> {
             cell_elem.document().text_pos_at(cell_elem.range().start),
         ))?;
 
-    let mut cell = Vec::new();
-    cell.extend(
-        paragraph_elem
-            .children()
-            .map(|child| convert_content(child, &mut vec![]))
-            .collect::<Result<Vec<_>, _>>()?,
-    );
+    let content = paragraph_elem
+        .children()
+        .map(|child| convert_content(child, &mut vec![]))
+        .collect::<Result<Vec<_>, _>>()?;
+    cell.content = content;
 
     Ok(cell)
 }
