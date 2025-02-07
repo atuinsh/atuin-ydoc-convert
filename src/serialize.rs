@@ -27,7 +27,7 @@ fn serialize_xml_out(elem: XmlOut, out: &mut String, txn: &Transaction) {
                 out.push_str(&format!(" {}=\"{}\"", name, escape_xml_text(&value)));
             }
 
-            out.push_str(">");
+            out.push('>');
 
             for child in elem.children(txn) {
                 serialize_xml_out(child, out, txn);
@@ -41,16 +41,13 @@ fn serialize_xml_out(elem: XmlOut, out: &mut String, txn: &Transaction) {
         XmlOut::Text(text) => {
             let diffs = text.diff(txn, YChange::identity);
             for diff in diffs {
-                match diff.insert {
-                    yrs::Out::Any(yrs::Any::String(s)) => {
-                        let mut attributes = Vec::new();
-                        if let Some(attr_map) = &diff.attributes {
-                            attributes.extend(attr_map.iter());
-                        }
-
-                        serialize_diff_insert_string(s, &attributes, out);
+                if let yrs::Out::Any(yrs::Any::String(s)) = diff.insert {
+                    let mut attributes = Vec::new();
+                    if let Some(attr_map) = &diff.attributes {
+                        attributes.extend(attr_map.iter());
                     }
-                    _ => {}
+
+                    serialize_diff_insert_string(s, &attributes, out);
                 }
             }
         }
@@ -66,17 +63,14 @@ fn serialize_diff_insert_string(
     for (tag_name, attributes) in diff_attrs.iter() {
         out.push_str(&format!("<{}", tag_name));
 
-        match attributes {
-            yrs::Any::Map(m) => {
-                serialize_diff_attr_map(m.clone(), out);
-            }
-            _ => {}
+        if let yrs::Any::Map(m) = attributes {
+            serialize_diff_attr_map(m.clone(), out);
         }
 
-        out.push_str(">");
+        out.push('>');
     }
 
-    out.push_str(&format!("{}", escape_xml_text(&s)));
+    out.push_str(&escape_xml_text(&s));
 
     for (tag_name, _) in diff_attrs.iter().rev() {
         out.push_str(&format!("</{}>", tag_name));
@@ -90,7 +84,7 @@ fn serialize_diff_attr_map(m: Arc<HashMap<String, yrs::Any>>, out: &mut String) 
                 out.push_str(&format!(" {}=\"\"", name));
             }
             yrs::Any::String(s) => {
-                out.push_str(&format!(" {}=\"{}\"", name, escape_xml_text(&s)));
+                out.push_str(&format!(" {}=\"{}\"", name, escape_xml_text(s)));
             }
             _ => {}
         }
