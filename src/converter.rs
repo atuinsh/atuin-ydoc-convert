@@ -98,7 +98,8 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<BasicContent, 
             Ok(content)
         }
         NodeType::Element => match node.tag_name().name() {
-            "bold" | "italic" | "underline" | "strike" | "textColor" | "backgroundColor" => {
+            "bold" | "italic" | "underline" | "strike" | "code" | "textColor"
+            | "backgroundColor" => {
                 // Style tags can have either one text child or one element child.
                 // In the case of an element child, the tag could be surrounded by whitespace.
                 // This seems to only happen when the XML is formatted with newlines,

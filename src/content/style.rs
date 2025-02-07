@@ -4,6 +4,7 @@ pub(crate) enum Style {
     Italic,
     Underline,
     Strike,
+    Code,
     TextColor(String),
     BackgroundColor(String),
 }
@@ -15,6 +16,7 @@ impl Style {
             Style::Italic => "italic",
             Style::Underline => "underline",
             Style::Strike => "strike",
+            Style::Code => "code",
             Style::TextColor(_) => "textColor",
             Style::BackgroundColor(_) => "backgroundColor",
         }
@@ -30,6 +32,7 @@ impl TryFrom<&str> for Style {
             "italic" => Ok(Style::Italic),
             "underline" => Ok(Style::Underline),
             "strike" => Ok(Style::Strike),
+            "code" => Ok(Style::Code),
             _ => Err(format!("Cannot create Style from {}", s)),
         }
     }

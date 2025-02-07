@@ -135,6 +135,49 @@ fn test_convert_formatted_content() {
 }
 
 #[test]
+fn test_convert_code() {
+    let input = r#"
+    <blockGroup>
+      <blockContainer textColor="default" backgroundColor="default"
+        id="f6596d68-4414-48f3-b502-eb54c9a00b17">
+        <paragraph textAlignment="left">here is <code>some code</code> yay</paragraph>
+      </blockContainer>
+      <blockContainer textColor="default" id="30bd3f34-0288-43fe-9045-c58b71305e9d"
+        backgroundColor="default">
+        <paragraph textAlignment="left"></paragraph>
+      </blockContainer>
+    </blockGroup>
+    "#;
+
+    let expected: Value = serde_json::from_str(
+        r#"
+    [
+      {
+        "id": "f6596d68-4414-48f3-b502-eb54c9a00b17",
+        "type": "paragraph",
+        "props": {
+          "textColor": "default",
+          "backgroundColor": "default",
+          "textAlignment": "left"
+        },
+        "content": [
+          { "type": "text", "text": "here is ", "styles": {} },
+          { "type": "text", "text": "some code", "styles": { "code": true } },
+          { "type": "text", "text": " yay", "styles": {} }
+        ],
+        "children": []
+      }
+    ]
+    "#,
+    )
+    .unwrap();
+
+    let result = convert_to_value(input.to_string()).unwrap();
+
+    assert_json_incl(&expected, &result);
+}
+
+#[test]
 fn test_convert_nested_block() {
     let input = r#"
     <blockgroup>
