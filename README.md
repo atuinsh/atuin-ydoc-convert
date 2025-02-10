@@ -1,5 +1,7 @@
 # atuin-ydoc-convert
 
+> **Note:** this is an internal repository, and issues and pull requests will not be accepted.
+
 Converts XML from BlockNote's YJS format to the standard BlockNote JSON format. Uses [roxmltree](https://crates.io/crates/roxmltree) to parse the XML.
 
 ## Usage
