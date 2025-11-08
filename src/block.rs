@@ -1,7 +1,7 @@
-use roxmltree::Attributes;
+use roxmltree::{Attributes, TextPos};
 use serde_json::{json, Value};
 
-use crate::content::Content;
+use crate::{content::Content, Error};
 
 #[derive(Clone, Debug)]
 pub(crate) struct Block {
@@ -31,19 +31,22 @@ impl Block {
                 }
                 name => {
                     // Handle type conversion for built-in block types
+                    // Sometimes we can get "undefined" in attribute values, so we ignore errors
                     match (self.type_name.as_str(), name) {
                         ("heading", "level")
                         | ("image", "previewWidth")
                         | ("video", "previewWidth") => {
-                            let value = attr.value().parse::<u64>().unwrap();
-                            self.props.insert(name.to_string(), json!(value));
+                            if let Some(value) = attr.value().parse::<u64>().ok() {
+                                self.props.insert(name.to_string(), json!(value));
+                            }
                         }
                         ("checkListItem", "checked")
                         | ("image", "showPreview")
                         | ("audio", "showPreview")
                         | ("video", "showPreview") => {
-                            let value = attr.value().parse::<bool>().unwrap();
-                            self.props.insert(name.to_string(), json!(value));
+                            if let Some(value) = attr.value().parse::<bool>().ok() {
+                                self.props.insert(name.to_string(), json!(value));
+                            }
                         }
                         ("bulletlistitem", "index")
                         | ("checklistitem", "index")
