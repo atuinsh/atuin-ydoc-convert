@@ -110,7 +110,12 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<BasicContent, 
                     .children()
                     .filter(|child| {
                         child.is_element()
-                            || (child.is_text() && !child.text().unwrap().trim().is_empty())
+                            || (child.is_text()
+                                && !child
+                                    .text()
+                                    .expect("child.is_text() is true, but child.text() is None")
+                                    .trim()
+                                    .is_empty())
                     })
                     .collect::<Vec<_>>();
                 if children.is_empty() {
@@ -150,7 +155,12 @@ fn convert_content(node: Node, styles: &mut Vec<Style>) -> Result<BasicContent, 
                             })?);
                         }
                     }
-                    convert_content(*children.first().unwrap(), styles)
+                    convert_content(
+                        *children
+                            .first()
+                            .expect("children.is_empty() is false, but children.first() is None"),
+                        styles,
+                    )
                 }
             }
             name => {
