@@ -36,7 +36,7 @@ impl Block {
                         ("heading", "level")
                         | ("image", "previewWidth")
                         | ("video", "previewWidth") => {
-                            if let Some(value) = attr.value().parse::<u64>().ok() {
+                            if let Ok(value) = attr.value().parse::<u64>() {
                                 self.props.insert(name.to_string(), json!(value));
                             }
                         }
@@ -44,7 +44,7 @@ impl Block {
                         | ("image", "showPreview")
                         | ("audio", "showPreview")
                         | ("video", "showPreview") => {
-                            if let Some(value) = attr.value().parse::<bool>().ok() {
+                            if let Ok(value) = attr.value().parse::<bool>() {
                                 self.props.insert(name.to_string(), json!(value));
                             }
                         }
