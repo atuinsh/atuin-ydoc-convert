@@ -1,7 +1,7 @@
-use roxmltree::{Attributes, TextPos};
+use roxmltree::Attributes;
 use serde_json::{json, Value};
 
-use crate::{content::Content, Error};
+use crate::content::Content;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Block {
